@@ -9,13 +9,13 @@ import java.util.concurrent.ThreadLocalRandom;
 public class Dice {
 
     List<String> savedDice = new ArrayList<>();
-    LinkedHashSet<Point> coordinates = new LinkedHashSet<Point>();
     Point[] coordinatesArray;
-    //String[] diceOutcomes = {"1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣"};
-    String[] diceOutcomes = {"6️⃣","6️⃣","6️⃣","6️⃣", "5️⃣", "5️⃣"};
+    String[] diceOutcomes = {"1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣"};
+    //String[] diceOutcomes = {"6️⃣","6️⃣","6️⃣","6️⃣", "5️⃣", "5️⃣"};
     public Die[] dice;
 
     public Die[] roll(int diceAmount, int width, int height){
+        LinkedHashSet<Point> coordinates = new LinkedHashSet<Point>();
         dice = new Die[diceAmount];
         coordinatesArray = new Point[diceAmount];
         while(coordinates.size() < diceAmount){

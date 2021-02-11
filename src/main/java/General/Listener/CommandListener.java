@@ -89,6 +89,7 @@ public class CommandListener extends ListenerAdapter {
                             "Reageer met \"🛑\" om het spel te stoppen, druk op \"✖\" om het stoppen te annuleren.",
                             stopEmotes,
                             false,
+                            false,
                             true);
                 }
 

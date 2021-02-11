@@ -12,18 +12,15 @@ public class DertigGame {
 
     //int to determine what number should be thrown in the bonus rounds and an array with the continue button to snd to the builders
     public int throwNumber;
-    public String throwString;
     String[] continueButton = {"✅"};
 
     //Variables for the end rounds
-    boolean inEndGame = false;
-    boolean roundDone = false;
-    boolean gameDone = false;
-    int vorigeSlokken = 0;
+    boolean startEndGame = false;
+    public DertigEndGame dertigEndGame = new DertigEndGame();
 
     //the channel where all the messages for this game will be sent and the message ID
-    TextChannel channel;
-    long gameMessageID;
+    public TextChannel channel;
+    public long gameMessageID;
     public Long stopMessageID;
 
     //a list of all the reactions a message needs
@@ -66,6 +63,7 @@ public class DertigGame {
                 gameFooter,
                 reactions.toArray(reactionsArray),
                 true,
+                false,
                 false);
     }
 
@@ -77,21 +75,6 @@ public class DertigGame {
                 finalMessage,
                 gameFooter,
                 null));
-    }
-
-    public void updateEndRound(){
-        int tempDicLeft = diceLeft;
-        for(Die die : diceRolls){
-            if(die.outcome == throwString){
-                diceLeft --;
-                updateRound(throwString);
-            }
-        }
-        if(diceLeft < tempDicLeft){
-            gameDone = false;
-        }else if (diceLeft == tempDicLeft){
-            gameDone = true;
-        }
     }
 
     public void updateGame(){
@@ -178,7 +161,7 @@ public class DertigGame {
     }
 
     public void confirm(){
-        if (!inEndGame) {
+        if (!startEndGame) {
             boolean saved = false;
             for (int i = 0; i < savedDice.length; i++) {
                 if (!savedDice[i].saved &&
@@ -204,64 +187,10 @@ public class DertigGame {
                     updateGame();
                 }
             }
-        }else if (inEndGame && !roundDone){
-            saveDie(throwString);
-            diceLeft = 6;
-            diceRolls = dice.roll(diceLeft, width, height);
-            updateEndRound();
-            Builders.sendEmbed(channel,
-                    gameTitle,
-                    printGame(),
-                    "Je moet" + throwString + "en gooien. Klik op \"✅\" om door te gaan",
-                    continueButton,
-                    true,
-                    false);
-            roundDone = true;
-        }else if (inEndGame && roundDone){
-            saveDie(throwString);
-            diceLeft = 6;
-            diceRolls = dice.roll(diceLeft, width, height);
-            updateEndRound();
-            startEndGame(savedDice);
-            channel.retrieveMessageById(gameMessageID).queue( msg ->Builders.updateGameEmbed(
-                    msg,
-                    gameTitle,
-                    printGame(),
-                    "Je moet" + throwString + "en gooien. Klik op \"✅\" om door te gaan",
-                    continueButton));
-        }
-    }
-
-    public void startEndGame(Die[] correctDice) {
-        int dice = 0;
-        for (Die die : correctDice) {
-            if(!die.outcome.equals(Die.box)){
-                dice++;
-            }
-        }
-        int slokken = throwNumber * dice + vorigeSlokken;
-
-        if(dice == 6 && throwNumber != 1 ){
-            for(Die die : savedDice){
-                System.out.println("boxified");
-                die.outcome = Die.box;
-            }
-            roundDone = false;
-            vorigeSlokken= slokken;
-            throwNumber --;
-            setThrowString();
-            inEndGame = true;
-            diceLeft = 6;
-        }else{
-            if(gameDone){
-                Builders.sendEmbed(channel,
-                        "De speler na jou neemt: " + Integer.toString(slokken) + " slokken",
-                        "En is daarna aan de beurt", "Gebruik het commando gooi om nog eens te spelen",
-                        null,
-                        false,
-                        false);
-                DertigUtil.removeGame(channel);
-            }
+        }else if (!dertigEndGame.endGameStarted && startEndGame){
+            dertigEndGame.startEndGame(this);
+        }else if (dertigEndGame.endGameStarted && startEndGame){
+            dertigEndGame.updateEndGame();
         }
     }
 
@@ -290,20 +219,19 @@ public class DertigGame {
                     "Gebruik het commando gooi om nog eens te spelen",
                     null,
                     false,
+                    false,
                     false);
             DertigUtil.removeGame(channel);
         } else if (score > 30) {
             throwNumber = score - 30;
-            setThrowString();
-            inEndGame = true;
-            //reset ome dice variables before going into the endgame
-            diceLeft = 6;
-            savedDice = dice.initSaved();
+            dertigEndGame.setThrowString(throwNumber);
+            startEndGame = true;
             Builders.sendEmbed(channel,
                     "Je eindscore is: " + Integer.toString(score),
-                    " dus je moet " + throwString + "en gaan gooien.",
+                    " dus je moet " + dertigEndGame.throwString + "en gaan gooien.",
                     "Klik op \"✅\" om verder te gaan",
                     continueButton,
+                    false,
                     false,
                     false);
         } else {
@@ -313,24 +241,17 @@ public class DertigGame {
                     "Gebruik het commando gooi om nog eens te spelen",
                     null,
                     false,
+                    false,
                     false);
             DertigUtil.removeGame(channel);
         }
     }
 
-    public void setThrowString(){
-        switch (throwNumber) {
-            case 1 -> throwString = "1️⃣";
-            case 2 -> throwString = "2️⃣";
-            case 3 -> throwString = "3️⃣";
-            case 4 -> throwString = "4️⃣";
-            case 5 -> throwString = "5️⃣";
-            case 6 -> throwString = "6️⃣";
-        }
-    }
-
     public void setGameMessageID(Message gameMessage) {
         gameMessageID = gameMessage.getIdLong();
+    }
+    public void setEndGameMessageID(Message endGameMessage){
+        dertigEndGame.endGameMessageID = endGameMessage.getIdLong();
     }
 
     public void setStopMessageID(Message stopMessage) {

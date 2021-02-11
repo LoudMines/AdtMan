@@ -8,7 +8,7 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import java.util.concurrent.TimeUnit;
 
 public class Builders {
-    public static void sendEmbed(MessageChannel channel, String title, String description, String footer, @Nullable String[] reactions, boolean setGameID, boolean setStopID) {
+    public static void sendEmbed(MessageChannel channel, String title, String description, String footer, @Nullable String[] reactions, boolean setGameID, boolean setEndGameID, boolean setStopID) {
         EmbedBuilder embed = new EmbedBuilder();
         embed.setTitle(title);
         embed.setDescription(description);
@@ -21,6 +21,9 @@ public class Builders {
             }
             if (setGameID) {
                 DertigUtil.getGame(channel).setGameMessageID(message);
+            }
+            if (setEndGameID) {
+                DertigUtil.getGame(channel).setEndGameMessageID(message);
             }
             if (setStopID) {
                 DertigUtil.getGame(channel).setStopMessageID(message);
