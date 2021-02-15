@@ -8,6 +8,17 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import java.util.concurrent.TimeUnit;
 
 public class Builders {
+
+    static String tasteLogo ="\n" +
+            "⬛🟩⬛🟩⬛🟩⬛\n" +
+            "🟥🟩🟥🟥🟥🟩🟥\n" +
+            "⬛🟩⬛🟩⬛🟩⬛\n" +
+            "🟥🟥🟥⬜🟥🟥🟥\n" +
+            "⬛🟩⬛🟩⬛🟩⬛\n" +
+            "🟥🟩🟥🟥🟥🟩🟥\n" +
+            "⬛🟩⬛🟩⬛🟩⬛\n"+
+            "⬛⬛⬛🟩⬛⬛⬛";
+
     public static void sendEmbed(MessageChannel channel, String title, String description, String footer, @Nullable String[] reactions, boolean setGameID, boolean setEndGameID, boolean setStopID) {
         EmbedBuilder embed = new EmbedBuilder();
         embed.setTitle(title);
@@ -34,15 +45,7 @@ public class Builders {
     public static void sendTasteMessage(MessageChannel channel, String title, String description, String footer, @Nullable String[] reactions) {
         EmbedBuilder embed = new EmbedBuilder();
         embed.setTitle(title);
-        embed.setDescription(description + "\n" +
-                "⬛🟩⬛🟩⬛🟩⬛\n" +
-                "🟥🟩🟥🟥🟥🟩🟥\n" +
-                "⬛🟩⬛🟩⬛🟩⬛\n" +
-                "🟥🟥🟥⬜🟥🟥🟥\n" +
-                "⬛🟩⬛🟩⬛🟩⬛\n" +
-                "🟥🟩🟥🟥🟥🟩🟥\n" +
-                "⬛🟩⬛🟩⬛🟩⬛\n"+
-                "⬛⬛⬛🟩⬛⬛⬛");
+        embed.setDescription(description + tasteLogo);
         embed.setFooter(footer);
         channel.sendMessage(embed.build()).queue(message -> {
             if (reactions != null) {

@@ -13,7 +13,6 @@ public class Die {
     //possible dice values
     public static String box = "🔳";
     public static String table = "⬛";
-    String[] diceOutcomes = {"1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣"};
 
     public Die(int x, int y, String outcome){
         this.x = x;

@@ -6,7 +6,6 @@ import General.Bot;
 import General.Util.Builders;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
@@ -18,13 +17,11 @@ import java.util.TimerTask;
 public class CommandListener extends ListenerAdapter {
 
     //command lists
-    String[] info = {"info", "zuipbot", "zuipen", "jo", "hoi", "hallo", "30en"};
+    String[] info = {"info", "zuipbot", "zuipen", "jo", "hoi", "hallo"};
     List<String> infoList = Arrays.asList(info);
     String[] stop = {"stop", "quit"};
     List<String> stopList = Arrays.asList(stop);
-    String[] board = {"board", "play"};
-    List<String> boardList = Arrays.asList(board);
-    String[] roll = {"roll", "gooi"};
+    String[] roll = {"roll", "gooi", "30en", "play"};
     List<String> rollList = Arrays.asList(roll);
 
     String[] prefixes = {"!", "-", "~", "/"};
@@ -38,10 +35,10 @@ public class CommandListener extends ListenerAdapter {
 
         Bot.jda.getPresence().setStatus(OnlineStatus.ONLINE);
         String[] args = event.getMessage().getContentRaw().split(" ");
-        for (int i = 0; i < prefixes.length; i++) {
+        for (String prefix : prefixes) {
 
             //check if the message starts with one of the correct prefixes
-            if (args[0].startsWith(prefixes[i])) {
+            if (args[0].startsWith(prefix)) {
 
                 //remove the prefix
                 args[0] = args[0].substring(1);
@@ -71,11 +68,11 @@ public class CommandListener extends ListenerAdapter {
                 }
 
                 if (rollList.contains(args[0].toLowerCase())) {
-                    if(DertigUtil.hasGame(channel)){
+                    if (DertigUtil.hasGame(channel)) {
                         Builders.sendTempError(channel,
                                 "- Er is al een ronde bezig in dit textkanaal, ga naar een ander tekstkanaal of stuur \"-stop\".\n",
-                                7);
-                    }else{
+                                6);
+                    } else {
                         DertigGame game = new DertigGame(channel);
                         DertigUtil.setGame(channel, game);
                         DertigUtil.getGame(channel).startGame();
@@ -91,10 +88,6 @@ public class CommandListener extends ListenerAdapter {
                             false,
                             false,
                             true);
-                }
-
-                if (boardList.contains(args[0].toLowerCase())) {
-
                 }
             }
         }

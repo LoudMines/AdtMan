@@ -1,7 +1,6 @@
 package Dertigen;
 
 import Dertigen.Util.DertigUtil;
-import General.Bot;
 import General.Util.Builders;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -45,14 +44,14 @@ public class DertigGame {
     }
 
     public void startGame(){
-        reactions = new ArrayList<String>();
+        reactions = new ArrayList<>();
         reactions.add("🔄");
         diceRolls = dice.roll(diceLeft, width, height);
         savedDice = dice.initSaved();
         String message = printGame();
-        for (int i = 0; i < diceRolls.length; i++) {
-            if (!reactions.contains(diceRolls[i].outcome)){
-                reactions.add(diceRolls[i].outcome);
+        for (Die diceRoll : diceRolls) {
+            if (!reactions.contains(diceRoll.outcome)) {
+                reactions.add(diceRoll.outcome);
             }
         }
         reactions.add("✅");
@@ -78,13 +77,13 @@ public class DertigGame {
     }
 
     public void updateGame(){
-        reactions = new ArrayList<String>();
+        reactions = new ArrayList<>();
         reactions.add("🔄");
         diceRolls = dice.roll(diceLeft, width, height);
         String message = printGame();
-        for (int i = 0; i < diceRolls.length; i++) {
-            if (!reactions.contains(diceRolls[i].outcome)){
-                reactions.add(diceRolls[i].outcome);
+        for (Die diceRoll : diceRolls) {
+            if (!reactions.contains(diceRoll.outcome)) {
+                reactions.add(diceRoll.outcome);
             }
         }
         reactions.add("✅");
@@ -108,14 +107,14 @@ public class DertigGame {
                 } else {
                     newChar = "⬛";
                 }
-                for (int k = 0; k < diceRolls.length; k++) {
-                    if (j == diceRolls[k].x && i == diceRolls[k].y) {
-                        newChar = diceRolls[k].outcome;
+                for (Die diceRoll : diceRolls) {
+                    if (j == diceRoll.x && i == diceRoll.y) {
+                        newChar = diceRoll.outcome;
                     }
                 }
-                for (int k = 0; k < savedDice.length; k++) {
-                    if (j == savedDice[k].x && i == savedDice[k].y) {
-                        newChar = savedDice[k].outcome;
+                for (Die die : savedDice) {
+                    if (j == die.x && i == die.y) {
+                        newChar = die.outcome;
                     }
                 }
                 message += newChar;
@@ -126,35 +125,35 @@ public class DertigGame {
     }
 
     public void resetRound(){
-        for (int i = 0; i < savedDice.length; i++) {
-            if (!savedDice[i].outcome.equals(Die.box) && !savedDice[i].saved) {
-                    for (int j = 0; j < diceRolls.length; j++) {
-                        if (diceRolls[j].outcome.equals(Die.table)) {
-                            diceRolls[j].outcome = savedDice[i].outcome;
-                            savedDice[i].outcome = Die.box;
-                            String finalMessage = printGame();
-                            channel.retrieveMessageById(gameMessageID).queue( msg ->Builders.updateGameEmbed(msg,
-                                    gameTitle,
-                                    finalMessage,
-                                    gameFooter,
-                                    null));
-                            break;
-                        }
+        for (Die die : savedDice) {
+            if (!die.outcome.equals(Die.box) && !die.saved) {
+                for (Die diceRoll : diceRolls) {
+                    if (diceRoll.outcome.equals(Die.table)) {
+                        diceRoll.outcome = die.outcome;
+                        die.outcome = Die.box;
+                        String finalMessage = printGame();
+                        channel.retrieveMessageById(gameMessageID).queue(msg -> Builders.updateGameEmbed(msg,
+                                gameTitle,
+                                finalMessage,
+                                gameFooter,
+                                null));
+                        break;
+                    }
                 }
             }
         }
     }
 
     public void saveDie(String number){
-        for(int i = 0; i < diceRolls.length; i++){
-            if(diceRolls[i].outcome.equals(number)){
-                for (int j = 0; j < savedDice.length; j++) {
-                    if (savedDice[j].outcome.equals(Die.box)) {
-                        savedDice[j].outcome = diceRolls[i].outcome;
+        for (Die diceRoll : diceRolls) {
+            if (diceRoll.outcome.equals(number)) {
+                for (Die die : savedDice) {
+                    if (die.outcome.equals(Die.box)) {
+                        die.outcome = diceRoll.outcome;
                         break;
                     }
                 }
-                diceRolls[i].outcome = Die.table;
+                diceRoll.outcome = Die.table;
                 break;
             }
         }
@@ -163,21 +162,21 @@ public class DertigGame {
     public void confirm(){
         if (!startEndGame) {
             boolean saved = false;
-            for (int i = 0; i < savedDice.length; i++) {
-                if (!savedDice[i].saved &&
-                        !savedDice[i].outcome.equals(Die.box)) {
+            for (Die die : savedDice) {
+                if (!die.saved &&
+                        !die.outcome.equals(Die.box)) {
                     saved = true;
-                    savedDice[i].saved = true;
+                    die.saved = true;
                 }
             }
             if (!saved) {
                 Builders.sendTempError(channel,
                                 "- Selecteer minstens 1 dobbelsteen om te bewaren\n",
-                        10);
+                        6);
             } else {
                 diceLeft = 0;
-                for (int i = 0; i < savedDice.length; i++) {
-                    if (savedDice[i].outcome.equals(Die.box)) {
+                for (Die die : savedDice) {
+                    if (die.outcome.equals(Die.box)) {
                         diceLeft++;
                     }
                 }
@@ -187,35 +186,30 @@ public class DertigGame {
                     updateGame();
                 }
             }
-        }else if (!dertigEndGame.endGameStarted && startEndGame){
-            dertigEndGame.startEndGame(this);
-        }else if (dertigEndGame.endGameStarted && startEndGame){
+        }else if (!dertigEndGame.endGameStarted){
+            dertigEndGame.initEndGame(this);
+        }else{
             dertigEndGame.updateEndGame();
         }
     }
 
     public void endGame(Die[] finalDice) {
         int score = 0;
-        for (int i = 0; i < finalDice.length; i++) {
-            if (finalDice[i].outcome.equals("1️⃣")) {
-                score += 1;
-            } else if (finalDice[i].outcome.equals("2️⃣")) {
-                score += 2;
-            } else if (finalDice[i].outcome.equals("3️⃣")) {
-                score += 3;
-            } else if (finalDice[i].outcome.equals("4️⃣")) {
-                score += 4;
-            } else if (finalDice[i].outcome.equals("5️⃣")) {
-                score += 5;
-            } else if (finalDice[i].outcome.equals("6️⃣")) {
-                score += 6;
+        for (Die die : finalDice) {
+            switch (die.outcome) {
+                case "1️⃣" -> score += 1;
+                case "2️⃣" -> score += 2;
+                case "3️⃣" -> score += 3;
+                case "4️⃣" -> score += 4;
+                case "5️⃣" -> score += 5;
+                case "6️⃣" -> score += 6;
             }
         }
         if (score < 30) {
             int slokken = 30 - score;
             Builders.sendEmbed(channel,
-                    "Je eindscore is: " + Integer.toString(score),
-                    " dus je moet " + Integer.toString(slokken) + " slokken drinken.",
+                    "Je eindscore is: " + score,
+                    " dus je moet " + slokken + " slokken drinken.",
                     "Gebruik het commando gooi om nog eens te spelen",
                     null,
                     false,
@@ -227,7 +221,7 @@ public class DertigGame {
             dertigEndGame.setThrowString(throwNumber);
             startEndGame = true;
             Builders.sendEmbed(channel,
-                    "Je eindscore is: " + Integer.toString(score),
+                    "Je eindscore is: " + score,
                     " dus je moet " + dertigEndGame.throwString + "en gaan gooien.",
                     "Klik op \"✅\" om verder te gaan",
                     continueButton,
@@ -236,7 +230,7 @@ public class DertigGame {
                     false);
         } else {
             Builders.sendEmbed(channel,
-                    "Je eindscore is: " + Integer.toString(score),
+                    "Je eindscore is: " + score,
                     "Niemand drinkt.",
                     "Gebruik het commando gooi om nog eens te spelen",
                     null,
@@ -250,6 +244,7 @@ public class DertigGame {
     public void setGameMessageID(Message gameMessage) {
         gameMessageID = gameMessage.getIdLong();
     }
+
     public void setEndGameMessageID(Message endGameMessage){
         dertigEndGame.endGameMessageID = endGameMessage.getIdLong();
     }

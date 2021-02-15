@@ -3,15 +3,10 @@ package General.Listener;
 import Dertigen.DertigGame;
 import Dertigen.Util.DertigUtil;
 import General.Util.Builders;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import org.apache.maven.model.Build;
-
-import java.util.Arrays;
-import java.util.List;
 
 public class ReactionListener extends ListenerAdapter {
 
@@ -35,7 +30,7 @@ public class ReactionListener extends ListenerAdapter {
                     }else {
                         Builders.sendTempError(channel,
                                 "- Er is geen actieve ronde in dit textkanaal, Start een nieuwe ronde met \"-gooi\".\n",
-                                10);
+                                6);
                     }
                     } else {
                     switch (event.getReactionEmote().toString()) {

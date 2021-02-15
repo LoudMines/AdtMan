@@ -14,7 +14,7 @@ public class DertigEndGame {
     String[] continueButton = {"✅"};
 
     //Standard embed strings
-    String gameTitle = "Dertigen";
+    String endGameTitle = "Dertigen";
 
     //dice arrays and how many dice are left
     Dice dice = new Dice();
@@ -27,24 +27,27 @@ public class DertigEndGame {
     String throwString;
     int throwNumber;
     int vorigeSlokken = 0;
-    boolean gameDone = false;
-    boolean roundDone = false;
+    //boolean roundDone = false;
+    int correctDice = 0;
 
     //variables for the current used message
     public long endGameMessageID;
 
-    public void startEndGame(DertigGame dertigGame) {
-        //initiate all values using the game this came from
+    public void initEndGame(DertigGame dertigGame){
+        //initiate all the required values to those of the game this was started from.
         game = dertigGame;
         width = game.width;
         height = game.height;
         channel = game.channel;
 
+        //initiate the dice to all the required values.
         savedDice = dice.initSaved();
         diceLeft = 6;
         diceRolls = dice.roll(diceLeft, width, height);
+
+        //send the endGame message for the first time and set it's id
         Builders.sendEmbed(channel,
-                gameTitle,
+                endGameTitle,
                 printEndGame(),
                 "Je moet " + throwString + "en gooien. Klik op \"✅\" om door te gaan",
                 continueButton,
@@ -55,35 +58,78 @@ public class DertigEndGame {
     }
 
     public void updateEndGame() {
-        if (roundDone) {
-            savedDice = dice.initSaved();
-            diceLeft = 6;
-            roundDone = false;
+        if (checkDice() != 0){
+            saveDice(throwString);
+            channel.retrieveMessageById(endGameMessageID).queue(msg -> Builders.updateGameEmbed(
+                    msg,
+                    endGameTitle,
+                    printEndGame(),
+                    "Je moest " + throwString + "en gooien. Gebruik \"✅\" om door te gaan",
+                    continueButton
+            ));
+            if(diceLeft == 0){
+                roundDone();
+            }
+            diceRolls = dice.roll(diceLeft, width, height);
+        }else{
+            completeGame();
         }
-        checkWin();
-        saveDice(throwString);
-        diceRolls = dice.roll(diceLeft, width, height);
-        channel.retrieveMessageById(endGameMessageID).queue(msg -> Builders.updateGameEmbed(
-                msg,
-                gameTitle,
-                printEndGame(),
-                "Je moet" + throwString + "en gooien. Klik op \"✅\" om door te gaan",
-                continueButton));
+
     }
 
     public void saveDice(String number) {
-        for (int i = 0; i < diceRolls.length; i++) {
-            if (diceRolls[i].outcome.equals(number)) {
-                for (int j = 0; j < savedDice.length; j++) {
-                    if (savedDice[j].outcome.equals(Die.box)) {
-                        savedDice[j].outcome = diceRolls[i].outcome;
+        for (Die diceRoll : diceRolls) {
+            if (diceRoll.outcome.equals(number)) {
+                for (Die die : savedDice) {
+                    if (die.outcome.equals(Die.box)) {
+                        die.outcome = diceRoll.outcome;
                         diceLeft--;
                         break;
                     }
                 }
-                diceRolls[i].outcome = Die.table;
+                diceRoll.outcome = Die.table;
             }
         }
+    }
+
+    public void roundDone(){
+        vorigeSlokken = vorigeSlokken + 6 * throwNumber;
+        throwNumber --;
+        setThrowString(throwNumber);
+        diceLeft = 6;
+        savedDice = dice.initSaved();
+    }
+
+    public int checkDice(){
+        correctDice = 0;
+        for (Die die : diceRolls) {
+            if (die.outcome.equals(throwString)) {
+                correctDice++;
+            }
+        }
+        return correctDice;
+    }
+
+    public int checkSavedDice(){
+        correctDice = 0;
+        for (Die die : savedDice) {
+            if (die.outcome.equals(throwString)) {
+                correctDice++;
+            }
+        }
+        return correctDice;
+    }
+
+    public void completeGame(){
+        int slokken = checkSavedDice() * throwNumber + vorigeSlokken;
+        Builders.sendEmbed(channel,
+                "De speler na jou neemt: " + slokken + " slokken",
+                "En is daarna aan de beurt", "Gebruik het commando gooi om nog eens te spelen",
+                null,
+                false,
+                false,
+                false);
+        DertigUtil.removeGame(channel);
     }
 
     public String printEndGame() {
@@ -96,14 +142,14 @@ public class DertigEndGame {
                 } else {
                     newChar = "⬛";
                 }
-                for (int k = 0; k < diceRolls.length; k++) {
-                    if (j == diceRolls[k].x && i == diceRolls[k].y) {
-                        newChar = diceRolls[k].outcome;
+                for (Die diceRoll : diceRolls) {
+                    if (j == diceRoll.x && i == diceRoll.y) {
+                        newChar = diceRoll.outcome;
                     }
                 }
-                for (int k = 0; k < savedDice.length; k++) {
-                    if (j == savedDice[k].x && i == savedDice[k].y) {
-                        newChar = savedDice[k].outcome;
+                for (Die die : savedDice) {
+                    if (j == die.x && i == die.y) {
+                        newChar = die.outcome;
                     }
                 }
                 message += newChar;
@@ -111,46 +157,6 @@ public class DertigEndGame {
             message += "\n";
         }
         return message;
-    }
-
-    public void checkWin() {
-        int correctDice = 0;
-        int spaceLeft = 0;
-        for (Die die : diceRolls) {
-            if (die.outcome.equals(throwString)) {
-                correctDice++;
-            }
-        }
-        for (Die die : savedDice) {
-            if (die.outcome.equals(Die.box)) {
-                spaceLeft++;
-            }
-        }
-
-        int slokken = throwNumber * (6 - spaceLeft) + vorigeSlokken;
-
-        //check if there are no correct dicethrows
-        if (correctDice == 0 && spaceLeft != 0) {
-            gameDone = true;
-        } else if (correctDice != 0) {
-            //check if there are exactly as many dicethrows as there are places left to sve dice
-            if (correctDice == spaceLeft && throwNumber != 1) {
-                vorigeSlokken = slokken;
-                throwNumber--;
-                setThrowString(throwNumber);
-                roundDone = true;
-            }
-        }
-        if (gameDone) {
-            Builders.sendEmbed(channel,
-                    "De speler na jou neemt: " + Integer.toString(slokken) + " slokken",
-                    "En is daarna aan de beurt", "Gebruik het commando gooi om nog eens te spelen",
-                    null,
-                    false,
-                    false,
-                    false);
-            DertigUtil.removeGame(channel);
-        }
     }
 
     public void setThrowString(int previousThrowNumber) {
