@@ -197,12 +197,12 @@ public class DertigGame {
         int score = 0;
         for (Die die : finalDice) {
             switch (die.outcome) {
-                case "1️⃣" -> score += 1;
-                case "2️⃣" -> score += 2;
-                case "3️⃣" -> score += 3;
-                case "4️⃣" -> score += 4;
-                case "5️⃣" -> score += 5;
-                case "6️⃣" -> score += 6;
+                case "1️⃣": score += 1; break;
+                case "2️⃣": score += 2; break;
+                case "3️⃣": score += 3; break;
+                case "4️⃣": score += 4; break;
+                case "5️⃣": score += 5; break;
+                case "6️⃣": score += 6; break;
             }
         }
         if (score < 30) {

@@ -162,12 +162,12 @@ public class DertigEndGame {
     public void setThrowString(int previousThrowNumber) {
         throwNumber = previousThrowNumber;
         switch (throwNumber) {
-            case 1 -> throwString = "1️⃣";
-            case 2 -> throwString = "2️⃣";
-            case 3 -> throwString = "3️⃣";
-            case 4 -> throwString = "4️⃣";
-            case 5 -> throwString = "5️⃣";
-            case 6 -> throwString = "6️⃣";
+            case 1: throwString = "1️⃣"; break;
+            case 2: throwString = "2️⃣"; break;
+            case 3: throwString = "3️⃣"; break;
+            case 4: throwString = "4️⃣"; break;
+            case 5: throwString = "5️⃣"; break;
+            case 6: throwString = "6️⃣"; break;
         }
     }
 }
