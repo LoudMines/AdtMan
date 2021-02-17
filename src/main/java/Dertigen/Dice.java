@@ -8,7 +8,8 @@ public class Dice {
 
     Point[] coordinatesArray;
     String[] diceOutcomes = {"1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣"};
-    //String[] diceOutcomes = {"6️⃣","6️⃣","6️⃣","6️⃣", "6️⃣", "5️⃣"};
+    //String[] diceOutcomes = {"6️⃣", "6️⃣", "6️⃣", "6️⃣", "6️⃣", "5️⃣"};
+    //String[] diceOutcomes = {"1️⃣", "1️⃣", "1️⃣", "1️⃣", "2️⃣", "2️⃣"};
     public Die[] dice;
 
     public Die[] roll(int diceAmount, int width, int height){

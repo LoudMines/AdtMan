@@ -21,6 +21,7 @@ public class DertigGame {
     public TextChannel channel;
     public long gameMessageID;
     public Long stopMessageID;
+    public String tempWarningString;
 
     //a list of all the reactions a message needs
     public ArrayList<String> reactions;
@@ -205,7 +206,17 @@ public class DertigGame {
                 case "6️⃣": score += 6; break;
             }
         }
-        if (score < 30) {
+        if(score <= 10){
+            Builders.sendEmbed(channel,
+                    "Je eindscore is: " + score,
+                    " dus alle andere spelers moeten een adtje trekken.",
+                    "Gebruik het commando gooi om nog eens te spelen",
+                    null,
+                    false,
+                    false,
+                    false);
+            DertigUtil.removeGame(channel);
+        }else if (score < 30) {
             int slokken = 30 - score;
             Builders.sendEmbed(channel,
                     "Je eindscore is: " + score,
@@ -245,12 +256,9 @@ public class DertigGame {
         gameMessageID = gameMessage.getIdLong();
     }
 
-    public void setEndGameMessageID(Message endGameMessage){
-        dertigEndGame.endGameMessageID = endGameMessage.getIdLong();
-    }
+    public void setEndGameMessageID(Message endGameMessage){dertigEndGame.endGameMessageID = endGameMessage.getIdLong();}
 
     public void setStopMessageID(Message stopMessage) {
         stopMessageID = stopMessage.getIdLong();
     }
-
 }
