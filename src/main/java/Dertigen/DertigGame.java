@@ -128,7 +128,7 @@ public class DertigGame extends Game {
                     false,
                     false,
                     false);
-            GameList.removeGame(channel);
+            startNextTurn();
         }else if (score < 30) {
             int slokken = 30 - score;
             Builders.sendEmbed(channel,
@@ -139,7 +139,7 @@ public class DertigGame extends Game {
                     false,
                     false,
                     false);
-            GameList.removeGame(channel);
+            startNextTurn();
         } else if (score > 30) {
             throwNumber = score - 30;
             dertigEndGame.setThrowString(throwNumber);
@@ -161,7 +161,7 @@ public class DertigGame extends Game {
                     false,
                     false,
                     false);
-            GameList.removeGame(channel);
+            startNextTurn();
         }
     }
 
