@@ -1,15 +1,14 @@
-package Dertigen.Util;
+package General.Util;
 
-import Dertigen.DertigGame;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
 import java.util.HashMap;
 
-public class DertigUtil {
+public class GameList {
 
-    private static final HashMap<MessageChannel, DertigGame> games = new HashMap<>();
+    private static final HashMap<MessageChannel, Game> games = new HashMap<>();
 
-    public static void setGame(MessageChannel messageChannel, DertigGame game) {
+    public static void setGame(MessageChannel messageChannel, Game game) {
         games.put(messageChannel, game);
     }
 
@@ -17,7 +16,7 @@ public class DertigUtil {
         return games.containsKey(messageChannel);
     }
 
-    public static DertigGame getGame(MessageChannel messageChannel) {
+    public static Game getGame(MessageChannel messageChannel) {
         return games.get(messageChannel);
     }
 

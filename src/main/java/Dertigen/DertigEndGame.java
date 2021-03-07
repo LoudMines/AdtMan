@@ -1,8 +1,12 @@
 package Dertigen;
 
-import Dertigen.Util.DertigUtil;
+import General.DieGames.Dice;
+import General.DieGames.Die;
+import General.Util.GameList;
 import General.Util.Builders;
+import General.Util.UserList;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.User;
 
 public class DertigEndGame {
 
@@ -13,6 +17,10 @@ public class DertigEndGame {
     TextChannel channel;
     String[] continueButton = {"✅"};
 
+    //variables to keep track of users
+    User startUser;
+    User currentUser;
+
     //Standard embed strings
     String endGameTitle = "Dertigen";
 
@@ -20,15 +28,14 @@ public class DertigEndGame {
     Dice dice = new Dice();
     public Die[] diceRolls;
     public Die[] savedDice;
-    int diceLeft = 6;
+    int diceLeft;
 
     //variables to determine where in the end game we are currently
     boolean endGameStarted = false;
     String throwString;
     int throwNumber;
-    int vorigeSlokken = 0;
-    //boolean roundDone = false;
-    int correctDice = 0;
+    int vorigeSlokken;
+    int correctDice;
 
     //variables for the current used message
     public long endGameMessageID;
@@ -39,6 +46,15 @@ public class DertigEndGame {
         width = game.width;
         height = game.height;
         channel = game.channel;
+
+        //slokken tracking
+        vorigeSlokken = 0;
+        correctDice = 0;
+
+
+        //users
+        startUser = game.startUser;
+        currentUser = game.currentUser;
 
         //initiate the dice to all the required values.
         savedDice = dice.initSaved();
@@ -123,18 +139,20 @@ public class DertigEndGame {
     public void completeGame(){
         int slokken = checkSavedDice() * throwNumber + vorigeSlokken;
         Builders.sendEmbed(channel,
-                "De speler na jou neemt: " + slokken + " slokken",
-                "En is daarna aan de beurt", "Gebruik het commando gooi om nog eens te spelen",
+                 "Dat zijn " + slokken + " slokken",
+                "Voor " + UserList.getNextUser(channel, currentUser).getAsMention() +", die daarna ook aan de beurt is!",
+                "",
                 null,
                 false,
                 false,
                 false);
-        DertigUtil.removeGame(channel);
+        game.startNextTurn();
     }
 
     public String printEndGame() {
-        String message = "";
+        StringBuilder message = new StringBuilder();
         String newChar;
+        message.append(currentUser.getAsMention()).append(" is ").append(throwString).append("en an het gooien.\n\n");
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
                 if (j == 4) {
@@ -152,11 +170,11 @@ public class DertigEndGame {
                         newChar = die.outcome;
                     }
                 }
-                message += newChar;
+                message.append(newChar);
             }
-            message += "\n";
+            message.append("\n");
         }
-        return message;
+        return message.toString();
     }
 
     public void setThrowString(int previousThrowNumber) {

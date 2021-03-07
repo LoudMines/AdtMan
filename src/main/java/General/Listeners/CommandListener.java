@@ -1,9 +1,10 @@
-package General.Listener;
+package General.Listeners;
 
 import Dertigen.DertigGame;
-import Dertigen.Util.DertigUtil;
+import General.Util.GameList;
 import General.Bot;
 import General.Util.Builders;
+import General.Util.UserList;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
@@ -21,7 +22,7 @@ public class CommandListener extends ListenerAdapter {
     List<String> infoList = Arrays.asList(info);
     String[] stop = {"stop", "quit"};
     List<String> stopList = Arrays.asList(stop);
-    String[] roll = {"roll", "gooi", "30en", "play"};
+    String[] roll = {"roll", "gooi", "30en", "speel"};
     List<String> rollList = Arrays.asList(roll);
 
     String[] prefixes = {"!", "-", "~", "/"};
@@ -61,33 +62,37 @@ public class CommandListener extends ListenerAdapter {
                     Builders.sendTasteMessage(event.getChannel(),
                             "Welkom bij Adman!",
                             "Adman is een discord bot gemaakt voor drankspellen. " +
-                                    "Momenteel is dertigen het enige spel dat gespeeld kan worden, maar in de" +
+                                    "Momenteel is dertigen het enige spel dat gespeeld kan worden, maar in de " +
                                     "toekomst komen er meer spellen aan! Veel plezier!",
                             "Gebruik om een ronde dertigen te beginnen het commando -gooi. of reageer met \"🍻\" op dit bericht.",
                             beerEmote);
                 }
 
                 if (rollList.contains(args[0].toLowerCase())) {
-                    if (DertigUtil.hasGame(channel)) {
+                    if (GameList.hasGame(channel)) {
                         Builders.sendTempError(channel,
                                 "- Er is al een ronde bezig in dit textkanaal, ga naar een ander tekstkanaal of stuur \"-stop\".\n",
                                 6);
                     } else {
-                        DertigGame game = new DertigGame(channel);
-                        DertigUtil.setGame(channel, game);
-                        DertigUtil.getGame(channel).startGame();
+                        if(!UserList.hasUserList(channel)) {
+                            DertigGame game = new DertigGame(channel, "dertigen");
+                            GameList.setGame(channel, game);
+                            GameList.getGame(channel).setPlayerList(event.getAuthor());
+                        }
                     }
                 }
 
                 if (stopList.contains(args[0].toLowerCase())) {
-                    Builders.sendEmbed(event.getChannel(),
-                            "Stoppen",
-                            "Weet je zeker dat je de ronde wil stoppen?",
-                            "Reageer met \"🛑\" om het spel te stoppen, druk op \"✖\" om het stoppen te annuleren.",
-                            stopEmotes,
-                            false,
-                            false,
-                            true);
+                    if(GameList.hasGame(channel)) {
+                        Builders.sendEmbed(event.getChannel(),
+                                "Stoppen",
+                                "Weet je zeker dat je de ronde wil stoppen?",
+                                "Reageer met \"🛑\" om het spel te stoppen, druk op \"✖\" om het stoppen te annuleren.",
+                                stopEmotes,
+                                false,
+                                false,
+                                true);
+                    }
                 }
             }
         }

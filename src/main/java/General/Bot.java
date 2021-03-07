@@ -1,7 +1,7 @@
 package General;
 
-import General.Listener.CommandListener;
-import General.Listener.ReactionListener;
+import General.Listeners.CommandListener;
+import General.Listeners.ReactionListener;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;

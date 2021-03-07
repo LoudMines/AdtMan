@@ -1,15 +1,12 @@
 package General.Util;
 
-import Dertigen.Util.DertigUtil;
+import Dertigen.DertigGame;
 import com.google.inject.internal.Nullable;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.internal.utils.Checks;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class Builders {
@@ -30,15 +27,24 @@ public class Builders {
         embed.setDescription(description);
         embed.setFooter(footer);
         channel.sendMessage(embed.build()).queue(message -> {
-            sortReactions(reactions, message);
             if (setGameID) {
-                DertigUtil.getGame(channel).setGameMessageID(message);
+                GameList.getGame(channel).setGameMessageID(message);
             }
             if (setEndGameID) {
-                DertigUtil.getGame(channel).setEndGameMessageID(message);
+                try {
+                    DertigGame dertigGame = (DertigGame)GameList.getGame(channel);
+                    dertigGame.setEndGameMessageID(message);
+                }catch (Exception e){
+                    System.out.println("Heeft geen endgame");
+                }
             }
             if (setStopID) {
-                DertigUtil.getGame(channel).setStopMessageID(message);
+                GameList.getGame(channel).setStopMessageID(message);
+            }
+            if(reactions != null) {
+                for (String reaction : reactions) {
+                    message.addReaction(reaction).queue();
+                }
             }
         });
     }
@@ -49,7 +55,11 @@ public class Builders {
         embed.setDescription(game);
         embed.setFooter(footer);
         message.editMessage(embed.build()).queue(msg -> {
-            sortReactions(reactions, message);
+            if(reactions != null){
+                for (String reaction : reactions) {
+                    message.addReaction(reaction).queue();
+                }
+            }
         });
     }
 
@@ -76,15 +86,9 @@ public class Builders {
         });
     }
 
-
-    static void sortReactions(@Nullable String[] reactions, Message message) {
-        if (reactions != null) {
-            String[] numbers = Arrays.copyOfRange(reactions, 1, reactions.length - 1);
-            Arrays.sort(numbers);
-            if (reactions.length - 2 >= 0) System.arraycopy(numbers, 0, reactions, 1, reactions.length - 1 - 1);
-            for (String reaction : reactions) {
-                message.addReaction(reaction).queue();
-            }
-        }
+    public static void sendTempMessage(MessageChannel channel, String message, int seconds) {
+        channel.sendMessage(message).queue(msg -> {
+            msg.delete().queueAfter(seconds, TimeUnit.SECONDS);
+        });
     }
 }
