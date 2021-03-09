@@ -5,6 +5,7 @@ import com.google.inject.internal.Nullable;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.PrivateChannel;
 
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
@@ -47,6 +48,14 @@ public class Builders {
                 }
             }
         });
+    }
+
+    public static void sendPrivateEmbed(PrivateChannel channel, String title, String description, String footer) {
+        EmbedBuilder embed = new EmbedBuilder();
+        embed.setTitle(title);
+        embed.setDescription(description);
+        embed.setFooter(footer);
+        channel.sendMessage(embed.build()).queue();
     }
 
     public static void updateGameEmbed(Message message, String title, String game, String footer, @Nullable String[] reactions) {

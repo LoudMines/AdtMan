@@ -131,14 +131,25 @@ public class DertigGame extends Game {
             startNextTurn();
         }else if (score < 30) {
             int slokken = 30 - score;
-            Builders.sendEmbed(channel,
-                    "Je eindscore is: " + score,
-                    " dus je moet " + slokken + " slokken drinken.",
-                    "Gebruik het commando gooi om nog eens te spelen",
-                    null,
-                    false,
-                    false,
-                    false);
+            if(slokken != 1) {
+                Builders.sendEmbed(channel,
+                        "Je eindscore is: " + score,
+                        " dus je moet " + slokken + " slokken drinken.",
+                        "",
+                        null,
+                        false,
+                        false,
+                        false);
+            }else{
+                Builders.sendEmbed(channel,
+                        "Je eindscore is: " + score,
+                        " dus je moet " + slokken + " slok drinken.",
+                        "",
+                        null,
+                        false,
+                        false,
+                        false);
+            }
             startNextTurn();
         } else if (score > 30) {
             throwNumber = score - 30;
@@ -156,7 +167,7 @@ public class DertigGame extends Game {
             Builders.sendEmbed(channel,
                     "Je eindscore is: " + score,
                     "Niemand drinkt.",
-                    "Gebruik het commando gooi om nog eens te spelen",
+                    "",
                     null,
                     false,
                     false,
@@ -321,17 +332,6 @@ public class DertigGame extends Game {
                     Builders.sendTempMessage(channel, "Proost! 🍻", 5);
                 }
                 break;
-            //cheers easter egg
-            case "🍺":
-            case "🍾":
-            case "🍷":
-            case "🍸":
-            case "🍹":
-            case "🥂":
-            case "🥃":
-            case "🥤":
-                Builders.sendTempMessage(channel, "Proost! 🍻", 5);
-                break;
 
             //reset button
             case "🔄":
@@ -341,7 +341,7 @@ public class DertigGame extends Game {
                 break;
             //confirm button
             case "✅":
-                if (user.equals(currentUser)) {
+                if (UserList.contains(channel, user)) {
                     confirm(user);
                 }
                 break;

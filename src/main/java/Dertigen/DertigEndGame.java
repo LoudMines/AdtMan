@@ -80,7 +80,7 @@ public class DertigEndGame {
                     msg,
                     endGameTitle,
                     printEndGame(),
-                    "Je moest " + throwString + "en gooien. Gebruik \"✅\" om door te gaan",
+                    "Je moet " + throwString + "en gooien. Gebruik \"✅\" om door te gaan",
                     continueButton
             ));
             if(diceLeft == 0){
@@ -138,14 +138,25 @@ public class DertigEndGame {
 
     public void completeGame(){
         int slokken = checkSavedDice() * throwNumber + vorigeSlokken;
-        Builders.sendEmbed(channel,
-                 "Dat zijn " + slokken + " slokken",
-                "Voor " + UserList.getNextUser(channel, currentUser).getAsMention() +", die daarna ook aan de beurt is!",
-                "",
-                null,
-                false,
-                false,
-                false);
+        if(slokken != 1) {
+            Builders.sendEmbed(channel,
+                    "Dat zijn " + slokken + " slokken",
+                    "Voor " + UserList.getNextUser(channel, currentUser).getAsMention() + ", die daarna ook aan de beurt is!",
+                    "",
+                    null,
+                    false,
+                    false,
+                    false);
+        }else{
+            Builders.sendEmbed(channel,
+                    "Dat is " + slokken + " slok",
+                    "Voor " + UserList.getNextUser(channel, currentUser).getAsMention() + ", die daarna ook aan de beurt is!",
+                    "",
+                    null,
+                    false,
+                    false,
+                    false);
+        }
         game.startNextTurn();
     }
 
