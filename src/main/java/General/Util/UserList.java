@@ -27,6 +27,8 @@ public class UserList {
         }
     }
 
+    public static User getStartUser(MessageChannel messageChannel) {return userList.get(messageChannel).get(0);}
+
     public static void removeUser(MessageChannel messageChannel, User user) {userList.get(messageChannel).remove(user);}
 
     public static boolean contains(MessageChannel channel, User user){return userList.get(channel).contains(user);}

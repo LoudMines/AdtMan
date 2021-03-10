@@ -119,7 +119,7 @@ public class DertigGame extends Game {
                 case "6️⃣": score += 6; break;
             }
         }
-        if(score <= 10){
+        if(score < 10){
             Builders.sendEmbed(channel,
                     "Je eindscore is: " + score,
                     " dus alle andere spelers moeten een adtje trekken.",
@@ -203,7 +203,7 @@ public class DertigGame extends Game {
             channel.retrieveMessageById(gameMessageID).queue(msg -> msg.delete().queue());
             currentUser = startUser;
             startGame();
-        }else if (!startEndGame) {
+        }else if (!startEndGame && user.equals(currentUser)) {
             boolean saved = false;
             for (Die die : savedDice) {
                 if (!die.saved &&
@@ -229,9 +229,9 @@ public class DertigGame extends Game {
                     updateTurn();
                 }
             }
-        }else if (!dertigEndGame.endGameStarted){
+        }else if (!dertigEndGame.endGameStarted && user.equals(currentUser)){
             dertigEndGame.initEndGame(this);
-        }else{
+        }else if(user.equals(currentUser)){
             dertigEndGame.updateEndGame();
         }
     }
@@ -289,6 +289,13 @@ public class DertigGame extends Game {
         }
     }
 
+    public void skipTurn(User user){
+        if (user.equals(currentUser)){
+            startNextTurn();
+            startUser = UserList.getStartUser(channel);
+        }
+    }
+
     public void gameDone(){
         gameDone = true;
         StringBuilder users = new StringBuilder();
@@ -329,7 +336,7 @@ public class DertigGame extends Game {
                 if (GameList.getGame(channel).collecting && user.equals(startUser)) {
                     startGame();
                 } else {
-                    Builders.sendTempMessage(channel, "Proost! 🍻", 5);
+                    setPlayerList(user);
                 }
                 break;
 

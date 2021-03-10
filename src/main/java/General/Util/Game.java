@@ -67,6 +67,24 @@ public abstract class Game {
             );});
     }
 
+    public void removePlayer(User user){
+        UserList.removeUser(channel, user);
+        channel.retrieveMessageById(gameMessageID).queue(msg -> {
+            String playerString = "";
+            for(User listUser : UserList.getUserList(channel)){
+                if(listUser != startUser) {
+                    playerString += listUser.getAsMention() + " \n";
+                }
+            }
+            Builders.updateGameEmbed(
+                    msg,
+                    "Nieuwe ronde " + type,
+                    startUser.getAsMention() + " begint een nieuwe ronde " + type + ". Momenteel doen de volgende users ook mee: \n" + playerString,
+                    "Reageer met \"➕\" op dit bericht om ook mee te doen en reageer met \"" + getEmote(type) + "\" als alle deelnemers in de lijst staan.",
+                    joinReactions
+            );});
+    }
+
     public void startGame(){
         collecting = false;
         startTurn();
@@ -77,6 +95,8 @@ public abstract class Game {
     public abstract void startTurn();
 
     public abstract void updateTurn();
+
+    public abstract void skipTurn(User user);
 
     public abstract void updateRound(@Nullable String reaction);
 

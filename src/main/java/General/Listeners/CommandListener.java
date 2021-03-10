@@ -25,7 +25,7 @@ import static java.lang.Integer.parseInt;
 public class CommandListener extends ListenerAdapter {
 
     //command lists
-    String[] info = {"info", "zuipbot", "zuipen", "jo", "hoi", "hallo"};
+    String[] info = {"info", "zuipbot", "zuipen", "jo", "hoi", "hallo", "adtman"};
     List<String> infoList = Arrays.asList(info);
     String[] stop = {"stop", "quit"};
     List<String> stopList = Arrays.asList(stop);
@@ -39,6 +39,12 @@ public class CommandListener extends ListenerAdapter {
     List<String> helpList = Arrays.asList(help);
     String[] rules = {"regels", "rules", "uitleg"};
     List<String> rulesList = Arrays.asList(rules);
+    String[] players = {"spelers", "players", "spelerlijst"};
+    List<String> playersList = Arrays.asList(players);
+    String[] leave = {"leave", "laf"};
+    List<String> leaveList = Arrays.asList(leave);
+    String[] join = {"join", "zuip"};
+    List<String> joinList = Arrays.asList(join);
 
     String[] prefixes = {"!", "-", "~", "/"};
 
@@ -58,7 +64,7 @@ public class CommandListener extends ListenerAdapter {
             } else {
                 feedbackUserID = Long.parseLong(new String(Files.readAllBytes(feedbackUserIDFile.toPath())));
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -95,17 +101,18 @@ public class CommandListener extends ListenerAdapter {
                                     "Momenteel is dertigen het enige spel dat gespeeld kan worden, maar in de " +
                                     "toekomst komen er meer spellen aan! Omdat deze bot nog onder ontwikkeling is, " +
                                     "Kunnen we jullie feedback goed gebruiken! Als er iets is dat aan de bot verbeterd " +
-                                    "kan worden, of iets dat ontbreekt, laat het dan even weten met -feedback gevolgd door je bericht." +
+                                    "kan worden, of iets dat ontbreekt, laat het dan even weten met -feedback gevolgd door je bericht.\n" +
+                                    "Gebruik het commando -help om een lijst van alle overige commandos te zien.\n" +
                                     "Bedankt voor het gebruik van Adtman, en vooral: veel plezier! 🍻",
                             "Gebruik om een ronde dertigen te beginnen het commando -gooi. of reageer met \"🍻\" op dit bericht.",
                             beerEmote);
-                }else if (rollList.contains(args[0].toLowerCase())) {
+                } else if (rollList.contains(args[0].toLowerCase())) {
                     if (GameList.hasGame(channel)) {
                         Builders.sendTempError(channel,
                                 "- Er is al een ronde bezig in dit textkanaal, ga naar een ander tekstkanaal of stuur \"-stop\".\n",
                                 6);
                     } else {
-                        if(!UserList.hasUserList(channel)) {
+                        if (!UserList.hasUserList(channel)) {
                             DertigGame game = new DertigGame(channel, "dertigen");
                             GameList.setGame(channel, game);
                             GameList.getGame(channel).setPlayerList(event.getAuthor());
@@ -114,7 +121,7 @@ public class CommandListener extends ListenerAdapter {
                 }
 
                 if (stopList.contains(args[0].toLowerCase())) {
-                    if(GameList.hasGame(channel)) {
+                    if (GameList.hasGame(channel)) {
                         Builders.sendEmbed(event.getChannel(),
                                 "Stoppen",
                                 "Weet je zeker dat je de ronde wil stoppen?",
@@ -124,7 +131,8 @@ public class CommandListener extends ListenerAdapter {
                                 false,
                                 true);
                     }
-                }else if (feedbackList.contains(args[0].toLowerCase())) {
+                } else if (feedbackList.contains(args[0].toLowerCase())) {
+                    if (args.length != 1) {
                         Builders.sendEmbed(event.getChannel(),
                                 "Bedankt voor de feedback👍",
                                 "Bedankt voor je bericht, we gaan kijken wat we ermee kunnen!",
@@ -134,35 +142,44 @@ public class CommandListener extends ListenerAdapter {
                                 false,
                                 false);
                         StringBuilder feedback = new StringBuilder();
-                        for(int i = 1; i < args.length; i++){
+                        for (int i = 1; i < args.length; i++) {
                             feedback.append(args[i]).append(" ");
                         }
-                        if(feedbackUserID != null){
+                        if (feedbackUserID != null) {
                             Bot.jda.retrieveUserById(feedbackUserID).queue(user ->
                                     user.openPrivateChannel().queue(feedbackChannel ->
-                                                Builders.sendPrivateEmbed(
-                                                        feedbackChannel,
-                                                        "Je hebt nieuwe feedback ontvangen!",
-                                                        "\" " + feedback.toString() + " \" Deze feedback komt van: " + event.getAuthor().getAsMention(),
-                                                        ""
-                                                )
+                                            Builders.sendPrivateEmbed(
+                                                    feedbackChannel,
+                                                    "Je hebt nieuwe feedback ontvangen!",
+                                                    "\" " + feedback.toString() + " \" Deze feedback komt van: " + event.getAuthor().getAsMention(),
+                                                    ""
                                             )
+                                    )
                             );
                         }
-                }else if (helpList.contains(args[0].toLowerCase())) {
-                        Builders.sendTasteMessage(event.getChannel(),
-                                "Help",
-                                "Bij deze een lijst van alle commandos en wat ze doen:\n" +
-                                        "-info ➡ Dit commando geeft wat meer info over deze bot.\n" +
-                                        "-gooi ➡ Dit commando start in het huidige kanaal een nieuwe ronde dertigen.\n" +
-                                        "-help ➡ Dit commando laat deze lijst met commandos zien\n" +
-                                        "-feedback ➡ Als er iets is dat niet klopt/ontbreekt aan de bot kan je dat doorgeven door -feedback gevolgd door je bericht te sturen.\n" +
-                                        "-stop ➡ Als er een spel bezig is in het textkanaal waarin -stop gestuurd wordt beëindigt dat het spel.\n" +
-                                        "-regels ➡ Dit commando heeft de uitleg van hoe dertigen werkt.\n" +
-                                        "Veel plezier met AdtMan!",
-                                "",
-                                null);
-                }else if (rulesList.contains(args[0].toLowerCase())) {
+                    } else {
+                        Builders.sendTempError(
+                                channel,
+                                "De feedback was leeg. Gebruik het commando als volgt: -feedback gevolgd door je feedback.",
+                                5);
+                    }
+                } else if (helpList.contains(args[0].toLowerCase())) {
+                    Builders.sendTasteMessage(event.getChannel(),
+                            "Help",
+                            "Bij deze een lijst van alle commandos en wat ze doen:\n" +
+                                    "-info ➡ Dit commando geeft wat meer info over deze bot.\n" +
+                                    "-gooi ➡ Dit commando start in het huidige kanaal een nieuwe ronde dertigen.\n" +
+                                    "-help ➡ Dit commando laat deze lijst met commandos zien\n" +
+                                    "-feedback ➡ Als er iets is dat niet klopt/ontbreekt aan de bot kan je dat doorgeven door -feedback gevolgd door je bericht te sturen.\n" +
+                                    "-stop ➡ Als er een spel bezig is in het textkanaal waarin -stop gestuurd wordt beëindigt dat het spel.\n" +
+                                    "-regels ➡ Dit commando heeft de uitleg van hoe dertigen werkt.\n" +
+                                    "-spelers ➡ Dit commando laat een lijst zien van de selers die meedoen aan het spel in dat kanaal.\n" +
+                                    "-join ➡ Dit commado kan gebruikt worden om me te doen met de ronde in dat kanaal.\n" +
+                                    "-laf ➡ Dit commando kan gebruikt worden als je de ronde waaraan je meedoet wil verlaten.\n" +
+                                    "Veel plezier met AdtMan!",
+                            "",
+                            null);
+                } else if (rulesList.contains(args[0].toLowerCase())) {
                     Builders.sendTasteMessage(event.getChannel(),
                             "Regels",
                             "Over het algemeen vertelt de bot je wat je moet doen en hoeveel je moet drinken, " +
@@ -180,16 +197,61 @@ public class CommandListener extends ListenerAdapter {
                                     "is, moet de speler zelf 30-het aantal ogen drinken (dus als er bijvoorbeeld 27 is gegooid, zijn dat 3 slokken).\n\n" +
                                     "Bij exact 30 gebeurt er niks, en bij hoger dan 30 komt er een volgende fase. \n\nIn deze fase gaat de speler opnieuw gooien, " +
                                     "met als enige doel om het aantal ogen - 30 te gooien (dus als er bijvoorbeeld 32 was gegooid, moet de speler nu tweeën gooien). \n" +
-                                    "Dit gaat door totdat het gezochte aantal niet meer gegooid wordt, of totdat alle dobbelstenen de goede waarde hebben. "+
+                                    "Dit gaat door totdat het gezochte aantal niet meer gegooid wordt, of totdat alle dobbelstenen de goede waarde hebben. " +
                                     "Als de goede waarde 6x gegooid is wordt deze 1 verlaagd en begint deze fase opnieuw. Anders worden de waardes bij elkaar " +
                                     "opgeteld, en dat is het aantal slokken dat de volgende speler moet nemen.\n\n" +
                                     "Voorbeeld: Een speler komt uit op 32 en gaat dus tweeën gooien. Hij gooit 6 tweeën en gaat dus enen gooien. Dan gooit hij 3 enen en " +
                                     "daarna geen enen meer. De speler na hem moet dan 6 X 2 + 3 X 1 slokken nemen dus 15 slokken.",
                             "Is er iets dat niet werkt of ontbreekt? Dat kan je aangeven met -feedback gevolgd door je bericht.",
                             null);
+                } else if (playersList.contains(args[0].toLowerCase())) {
+                    if (GameList.hasGame(channel)) {
+                        StringBuilder playerMessage = new StringBuilder();
+                        playerMessage.append("De speler die meedoen aan de huidige ronde zijn: \n");
+                        for (User user : UserList.getUserList(channel)) {
+                            playerMessage.append(user.getAsMention()).append("\n");
+                        }
+
+                        Builders.sendEmbed(event.getChannel(),
+                                "Spelerlijst",
+                                playerMessage.toString(),
+                                "Reageer met \"-laf\" om de ronde te verlaten en met \"-join\" om ook mee te doen.",
+                                null,
+                                false,
+                                false,
+                                false);
+                    }
+                }else if (leaveList.contains(args[0].toLowerCase()) && GameList.hasGame(channel)) {
+                    if (GameList.hasGame(channel)) {
+                        if (UserList.getUserList(channel).contains(event.getAuthor()) && UserList.getUserList(channel).size() != 1) {
+                            if (GameList.getGame(channel).collecting) {
+                                GameList.getGame(channel).removePlayer(event.getAuthor());
+                            } else {
+                                UserList.removeUser(channel, event.getAuthor());
+                                Builders.sendTempMessage(channel, event.getAuthor().getAsMention() + " doet niet meer mee.", 5);
+                            }
+                            if (UserList.getUserList(channel).size() > 0) {
+                                GameList.getGame(channel).skipTurn(event.getAuthor());
+                            } else {
+                                GameList.removeGame(channel);
+                                UserList.removeUserList(channel);
+                            }
+                        }
+                    }
+                }else if (joinList.contains(args[0].toLowerCase())) {
+                    if (GameList.hasGame(channel)) {
+                        if (!UserList.getUserList(channel).contains(event.getAuthor())) {
+                            if (GameList.getGame(channel).collecting) {
+                                GameList.getGame(channel).addPlayer(event.getAuthor());
+                            } else {
+                                UserList.addUser(channel, event.getAuthor());
+                                Builders.sendTempMessage(channel, event.getAuthor().getAsMention() + " doet nu ook mee.", 5);
+                            }
+                        }
+                    }
                 }
-            }else{
-                if(cheersList.contains(args[0].toLowerCase())){
+            } else {
+                if (cheersList.contains(args[0].toLowerCase())) {
                     Builders.sendTempMessage(channel, "Proost! 🍻", 5);
                 }
             }

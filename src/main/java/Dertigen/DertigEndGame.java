@@ -163,7 +163,7 @@ public class DertigEndGame {
     public String printEndGame() {
         StringBuilder message = new StringBuilder();
         String newChar;
-        message.append(currentUser.getAsMention()).append(" is ").append(throwString).append("en an het gooien.\n\n");
+        message.append(currentUser.getAsMention()).append(" is ").append(throwString).append("en aan het gooien.\n\n");
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
                 if (j == 4) {
